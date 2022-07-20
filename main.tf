@@ -40,16 +40,9 @@ resource "aws_nat_gateway" "nat0" {
   for_each = local.nat
   connectivity_type = "${each.value.connectivity_type}"
   subnet_id = each.value.subnet_id
+  allocation_id = each.value.allocation_id
   tags = {
     Name = "${var.prefix.nat}haunui-${each.key}"
-  }
-}
-
-resource "aws_network_interface" "ni0" {
-  for_each = local.ni
-  subnet_id = each.value.subnet_id
-  tags = {
-    Name = "${var.prefix.ni}haunui-${each.key}"
   }
 }
 
@@ -58,18 +51,16 @@ resource "aws_instance" "instance0" {
   ami = each.value.ami
   instance_type = "t2.micro"
   key_name = "${each.value.key_name}"
-
-  dynamic "network_interface" {
-    for_each = toset(each.value.network_interface)
-
-    content {
-      network_interface_id = network_interface.value.network_interface_id
-      device_index = network_interface.value.device_index
-    }
-  }
+  subnet_id = each.value.subnet_id
+  vpc_security_group_ids = each.value.vpc_security_group_ids
+  associate_public_ip_address = each.value.associate_public_ip_address
 
   tags = {
     Name = "${var.prefix.instance}haunui-${each.key}"
+  }
+
+  provisioner "local-exec" {
+    command = "echo ${self.public_ip} > public_ip"
   }
 }
 
@@ -93,4 +84,32 @@ resource "aws_route" "route0" {
   route_table_id = "${each.value.route_table_id}"
   destination_cidr_block = "${each.value.destination_cidr_block}"
   gateway_id = "${each.value.gateway_id}"
+}
+
+resource "aws_eip" "eip0" {
+  for_each = local.eip
+  vpc = each.value.vpc
+
+  tags = {
+    Name = "${var.prefix.eip}haunui-${each.key}"
+  }
+}
+
+resource "aws_security_group" "sg0" {
+  for_each = local.sg
+  name = "haunui${each.key}"
+  description = each.value.description
+  vpc_id = each.value.vpc_id
+
+}
+
+resource "aws_security_group_rule" "sgr0" {
+  for_each = local.sgr
+  security_group_id = "${each.value.security_group_id}"
+  source_security_group_id = try("${each.value.source_security_group_id}", null)
+  type = "${each.value.type}"
+  from_port = each.value.from_port
+  to_port = each.value.to_port
+  protocol = "${each.value.protocol}"
+  cidr_blocks = try("${each.value.cidr_blocks}", null)
 }

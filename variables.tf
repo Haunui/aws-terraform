@@ -8,6 +8,8 @@ variable "prefix" {
     ni = "ni-"
     instance = "i-"
     rtb = "rtb-"
+    eip = "eip-"
+    sg = "sg-"
   }
 }
 
@@ -38,38 +40,25 @@ locals {
   }
   nat = {
     nat0 = {
-      connectivity_type = "private"
+      connectivity_type = "public"
       subnet_id = aws_subnet.subnet0["subnet0"].id
-    }
-  }
-  ni = {
-    ni0sub0 = {
-      subnet_id = aws_subnet.subnet0["subnet0"].id
-    }
-    ni0sub1 = {
-      subnet_id = aws_subnet.subnet0["subnet1"].id
+      allocation_id = aws_eip.eip0["eip0"].id
     }
   }
   instance = {
     instance0 = {
-      ami = "ami-0f5094faf16f004eb"
+      ami = "ami-09e513e9eacab10c1"
       key_name = "keypair-haunui"
-      network_interface = [
-        {
-          network_interface_id = aws_network_interface.ni0["ni0sub0"].id
-          device_index = 0
-        }
-      ]
+      subnet_id = aws_subnet.subnet0["subnet0"].id
+      vpc_security_group_ids = ["${aws_security_group.sg0["sg0"].id}"]
+      associate_public_ip_address = true
     }
     instance1 = {
-      ami = "ami-0f5094faf16f004eb"
+      ami = "ami-09e513e9eacab10c1"
       key_name = "keypair-haunui"
-      network_interface = [
-        {
-          network_interface_id = aws_network_interface.ni0["ni0sub1"].id
-          device_index = 0
-        }
-      ]
+      subnet_id = aws_subnet.subnet0["subnet1"].id
+      vpc_security_group_ids = ["${aws_security_group.sg0["sg1"].id}"]
+      associate_public_ip_address = false
     }
   }
 
@@ -90,6 +79,56 @@ locals {
       route_table_id = "${aws_route_table.rtb0["rtb0"].id}"
       destination_cidr_block = "0.0.0.0/0"
       gateway_id = "${aws_nat_gateway.nat0["nat0"].id}"
+    }
+  }
+  eip = {
+    eip0 = {
+      instance = aws_instance.instance0["instance0"].id
+      vpc = true
+    }
+  }
+  sg = {
+    sg0 = {
+      description = "public_subnet"
+      vpc_id = aws_vpc.vpc0["vpc0"].id
+    }
+    sg1 = {
+      description = "private_subnet"
+      vpc_id = aws_vpc.vpc0["vpc0"].id
+    }
+  }
+  sgr = {
+    sg0r0 = {
+      security_group_id = "${aws_security_group.sg0["sg0"].id}"
+      type = "ingress"
+      from_port = 0
+      to_port = 0
+      protocol = "-1"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+    sg0r1 = {
+      security_group_id = "${aws_security_group.sg0["sg0"].id}"
+      type = "egress"
+      from_port = 0
+      to_port = 0
+      protocol = "-1"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+    sg1r0 = {
+      security_group_id = "${aws_security_group.sg0["sg1"].id}"
+      type = "ingress"
+      from_port = 0
+      to_port = 0
+      protocol = "-1"
+      source_security_group_id = "${aws_security_group.sg0["sg0"].id}"
+    }
+    sg1r1 = {
+      security_group_id = "${aws_security_group.sg0["sg1"].id}"
+      type = "egress"
+      from_port = 0
+      to_port = 0
+      protocol = "-1"
+      cidr_blocks = ["0.0.0.0/0"]
     }
   }
 }
