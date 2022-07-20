@@ -2,3 +2,5 @@
 *.tfstate.*
 .terraform*
 *.tf.swp
+
+public_ip
