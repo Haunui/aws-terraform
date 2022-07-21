@@ -3,4 +3,4 @@
 .terraform*
 *.tf.swp
 
-public_ip
+instances/
