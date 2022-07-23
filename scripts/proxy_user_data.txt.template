@@ -1,9 +1,7 @@
 #!/usr/bin/bash
 
-touch /var/log/user_log
-
-apt update -y 2>> /var/log/user_data.log
-DEBIAN_FRONTEND=noninteractive apt install squid -y 2>> /var/log/user_data.log
+apt update -y
+DEBIAN_FRONTEND=noninteractive apt install squid -y
 
 DC=$(cat /etc/squid/squid.conf)
 
