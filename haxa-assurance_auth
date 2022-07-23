@@ -2,23 +2,34 @@
 
 f=0
 
+CONFIG_FILE="/etc/squid/haxa.conf"
+
+if ! [ -f "$CONFIG_FILE" ]; then
+	echo "ERR"
+	exit 1
+fi
+
+export $(grep -v "^#" $CONFIG_FILE | xargs)
+
 while [ $f -eq 0 ]; do
 	read login
 
 	user=$(echo "$login" | cut -d' ' -f1)
 	password=$(echo "$login" | cut -d' ' -f2)
+	user=${user^}
 
-
-	r=$(htpasswd -iv htpasswd "$user" <<< "$password" 2>&1)
+	r=$(htpasswd -iv "$PASSWORD_FILE" "$user" <<< "$password" 2>&1)
 
 	if [[ $r =~ correct ]]; then
 		echo "OK"
 		continue
 	fi
 
-	DN=$(ldapsearch -x -w password -D cn=admin,dc=haxa,dc=assurance -H ldap://172.22.1.20 -LLLb "dc=haxa,dc=assurance" uid=$user | grep "dn: " | sed "s/dn: //g" | sed "s/uid=$user,//g" 2> /dev/null)
+	DN=$(ldapsearch -x -w "$BINDPW" -D "$BINDDN" -H "$URI" -LLLb "$BASE" uid=$user | grep "dn: " | sed "s/dn: //g" | sed "s/uid=$user,//g") #2> /dev/null)
 
-	if ldapwhoami -x -w "$password" -D "uid=$user,$DN" -H ldap://172.22.1.20 &> /dev/null; then
+	ldapwhoami -x -w "$password" -D "uid=$user,$DN" -H $URI &> /dev/null
+
+	if [ $? -eq 0 ]; then
 		echo "OK"
 	else
 		echo "ERR"
