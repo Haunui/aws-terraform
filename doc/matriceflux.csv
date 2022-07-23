@@ -1,11 +1,12 @@
 Security-Group;Port;Protocol;Type;Source
+
 sg-admin;22;tcp;ingress;0.0.0.0/0
 sg-admin;0;-1;egress;0.0.0.0/0
 sg-ldap;389;tcp;ingress;0.0.0.0/0
 sg-ldap;0;-1;egress;0.0.0.0/0
 sg-proxy;3128;tcp;ingress;0.0.0.0/0
 sg-proxy;0;-1;egress;0.0.0.0/0
-sg-client1;0;-1;ingress;172.22.0.0/16
-sg-client1;0;-1;egress;0.0.0.0/0
-sg-client2;0;-1;ingress;172.22.0.0/16
-sg-client2;0;-1;egress;0.0.0.0/0
+sg-clientX;0;-1;ingress;172.22.0.0/16
+sg-clientX;0;-1;egress;0.0.0.0/0
+
+172.22.0.0/16 => VPC-Central
