@@ -3,12 +3,12 @@
 Déploiement d'une infra. sous AWS  
   
   
-doc/ : Différentes informations de l'infrastructure  
-scripts/ : Scripts lancés lors du déploiement des instances  
-haxa-assurance\_auth : Mechanisme d'authentification pour squid  
-main.tf : Fichier contenant les ressources terraform  
-variables.tf : Fichier contenant les variables utilisées par terraform  
-upload\_keys.sh : Script de téléversement de la paire de clé permettant d'accéder aux différentes machines de l'infrastructure  
+__doc/__ : Différentes informations de l'infrastructure  
+__scripts/__ : Scripts lancés lors du déploiement des instances  
+__haxa-assurance\_auth__ : Mechanisme d'authentification pour squid  
+__main.tf__ : Fichier contenant les ressources terraform  
+__variables.tf__ : Fichier contenant les variables utilisées par terraform  
+__upload\_keys.sh__ : Script de téléversement de la paire de clé permettant d'accéder aux différentes machines de l'infrastructure  
   
 # TODO  
 
