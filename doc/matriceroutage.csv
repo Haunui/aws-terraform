@@ -1,0 +1,12 @@
+Route-Table;Destination;Next-Hop
+rtb-haxa-assurance-DMZ;0.0.0.0/0;igw-haxa-assurance-igw0
+rtb-haxa-assurance-DMZ;10.0.0.0/16;vpc_pc-haxa-assurance-central_vpc1
+rtb-haxa-assurance-DMZ;10.1.0.0/16;vpc_pc-haxa-assurance-central_vpc2
+rtb-haxa-assurance-DMZ;172.22.0.0/16;local
+rtb-haxa-assurance-IB;10.0.0.0/16;vpc_pc-haxa-assurance-central_vpc1
+rtb-haxa-assurance-IB;10.1.0.0/16;vpc_pc-haxa-assurance-central_vpc2
+rtb-haxa-assurance-IB;172.22.0.0/16;local
+rtb-haxa-assurance-vpc1sub0;172.22.0.0/16;vpc_pc-haxa-assurance-central_vpc1
+rtb-haxa-assurance-vpc1sub0;10.0.0.0/16;local
+rtb-haxa-assurance-vpc2sub0;172.22.0.0/16;vpc_pc-haxa-assurance-central_vpc2
+rtb-haxa-assurance-vpc2sub0;10.1.0.0/16;local
