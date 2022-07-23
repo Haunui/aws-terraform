@@ -1,5 +1,11 @@
 #!/usr/bin/bash
 
+cat <<EOF > /etc/apt/apt.conf.d/10-proxy.conf
+Acquire::http::proxy "http://T03895123:ITmVVgiz2Rg6IYjx@172.22.1.20:3128/";
+Acquire::https::proxy "http://T03895123:ITmVVgiz2Rg6IYjx@172.22.1.20:3128/";
+Acquire::ftp::proxy "http://T03895123:ITmVVgiz2Rg6IYjx@172.22.1.20:3128/";
+EOF
+
 apt update -y
 DEBIAN_FRONTEND=noninteractive apt install -y libnss-ldapd libpam-ldapd ldap-utils
 
@@ -7,8 +13,8 @@ sed -i "s/^passwd:.*/passwd:\t\tfiles ldap/" /etc/nsswitch.conf
 sed -i "s/^group:.*/group:\t\tfiles ldap/" /etc/nsswitch.conf
 sed -i "s/^shadow:.*/shadow:\t\tfiles ldap/" /etc/nsswitch.conf
 
-sed -i "s|uri.*|uri ldap://10.0.2.10/|" /etc/nslcd.conf
-sed -i "s|base.*|base dc=haunui,dc=local|" /etc/nslcd.conf
+sed -i "s|uri.*|uri ldap://172.22.1.20/|" /etc/nslcd.conf
+sed -i "s|base.*|base ou=vpc1,dc=haunui,dc=local|" /etc/nslcd.conf
 
 systemctl restart nslcd
 

@@ -1,0 +1,36 @@
+#!/usr/bin/bash
+
+touch /var/log/user_log
+
+apt update -y 2>> /var/log/user_data.log
+DEBIAN_FRONTEND=noninteractive apt install squid -y 2>> /var/log/user_data.log
+
+DC=$(cat /etc/squid/squid.conf)
+
+cat <<EOF > /etc/squid/squid.conf
+auth_param basic program /usr/lib/squid/haxa-assurance_auth
+auth_param basic children 5
+auth_param basic realm Web-Proxy
+auth_param basic credentialsttl 30 minute
+
+acl haxa-auth proxy_auth REQUIRED
+
+http_access allow haxa-auth
+http_access deny all
+
+$DC
+EOF
+
+cat <<EOF > /etc/squid/haxa.conf
+PASSWORD_FILE=/etc/squid/htpasswd
+
+BASE=dc=haxa,dc=assurance
+URI=ldap://172.22.1.20
+
+BINDDN=cn=admin,dc=haxa,dc=assurance
+BINDPW=password
+EOF
+
+echo "ldapserver:\$apr1\$Do73bJ0v\$Amtfe0NJPBRUiebtptlOl." > /etc/squid/htpasswd
+
+systemctl restart squid

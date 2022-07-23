@@ -1,0 +1,26 @@
+#!/usr/bin/bash
+
+f=0
+
+while [ $f -eq 0 ]; do
+	read login
+
+	user=$(echo "$login" | cut -d' ' -f1)
+	password=$(echo "$login" | cut -d' ' -f2)
+
+
+	r=$(htpasswd -iv htpasswd "$user" <<< "$password" 2>&1)
+
+	if [[ $r =~ correct ]]; then
+		echo "OK"
+		continue
+	fi
+
+	DN=$(ldapsearch -x -w password -D cn=admin,dc=haxa,dc=assurance -H ldap://172.22.1.20 -LLLb "dc=haxa,dc=assurance" uid=$user | grep "dn: " | sed "s/dn: //g" | sed "s/uid=$user,//g" 2> /dev/null)
+
+	if ldapwhoami -x -w "$password" -D "uid=$user,$DN" -H ldap://172.22.1.20 &> /dev/null; then
+		echo "OK"
+	else
+		echo "ERR"
+	fi
+done

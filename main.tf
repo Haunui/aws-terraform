@@ -15,7 +15,7 @@ resource "aws_vpc" "vpc0" {
   for_each = var.vpc
   cidr_block = "${each.value.cidr_block}"
   tags = {
-    Name = "${var.prefix.vpc}haunui-${each.key}"
+    Name = "${var.prefix.vpc}${var.pname}-${each.key}"
   }
 }
 
@@ -24,7 +24,7 @@ resource "aws_subnet" "subnet0" {
   vpc_id = each.value.vpc_id
   cidr_block = "${each.value.cidr_block}"
   tags = {
-    Name = "${var.prefix.subnet}haunui-${each.key}"
+    Name = "${var.prefix.subnet}${var.pname}-${each.key}"
   }
 }
 
@@ -32,7 +32,7 @@ resource "aws_internet_gateway" "igw0" {
   for_each = local.igw
   vpc_id = each.value.vpc_id
   tags = {
-    Name = "${var.prefix.igw}haunui-${each.key}"
+    Name = "${var.prefix.igw}${var.pname}-${each.key}"
   }
 }
 
@@ -42,7 +42,7 @@ resource "aws_nat_gateway" "nat0" {
   subnet_id = each.value.subnet_id
   allocation_id = each.value.allocation_id
   tags = {
-    Name = "${var.prefix.nat}haunui-${each.key}"
+    Name = "${var.prefix.nat}${var.pname}-${each.key}"
   }
 }
 
@@ -59,7 +59,12 @@ resource "aws_instance" "instance0" {
   user_data = fileexists(try("${each.value.user_data}", "does_not_exist")) ? file("${each.value.user_data}") : null
 
   tags = {
-    Name = "${var.prefix.instance}haunui-${each.key}"
+    Name = "${var.prefix.instance}${var.pname}-${each.key}"
+  }
+
+  provisioner "local-exec" {
+    command = "${each.key}" == "admin" ? "bash upload_keys.sh $IP" : "echo 'Nothing to do.'"
+    environment = { IP = self.public_ip }
   }
 
   provisioner "local-exec" {
@@ -90,7 +95,7 @@ resource "aws_route_table" "rtb0" {
   vpc_id = each.value.vpc_id
 
   tags = {
-    Name = "${var.prefix.rtb}haunui-${each.key}"
+    Name = "${var.prefix.rtb}${var.pname}-${each.key}"
   }
 }
 
@@ -115,18 +120,18 @@ resource "aws_eip" "eip0" {
   vpc = each.value.vpc
 
   tags = {
-    Name = "${var.prefix.eip}haunui-${each.key}"
+    Name = "${var.prefix.eip}${var.pname}-${each.key}"
   }
 }
 
 resource "aws_security_group" "sg0" {
   for_each = local.sg
-  name = "haunui${each.key}"
+  name = "${var.pname}${each.key}"
   description = each.value.description
   vpc_id = each.value.vpc_id
 
   tags = {
-    Name = "${var.prefix.sg}haunui-${each.key}"
+    Name = "${var.prefix.sg}${var.pname}-${each.key}"
   }
 }
 
@@ -143,14 +148,14 @@ resource "aws_security_group_rule" "sgr0" {
 
 resource "aws_vpc_peering_connection" "vpc_pc0" {
   for_each = local.vpc_pc
-  peer_owner_id = each.value.peer_owner_id
+  peer_owner_id = try(each.value.peer_owner_id, null)
   peer_vpc_id   = each.value.peer_vpc_id
   vpc_id        = each.value.vpc_id
   peer_region   = try(each.value.peer_region, null)
   auto_accept   = true
 
   tags = {
-    Name = "${var.prefix.vpc_pc}haunui-${each.key}"
+    Name = "${var.prefix.vpc_pc}${var.pname}-${each.key}"
   }
 }
 
@@ -160,7 +165,7 @@ resource "aws_network_acl" "nacl0" {
   subnet_ids = try(each.value.subnet_ids, null)
 
   tags = {
-    Name = "${var.prefix.nacl}haunui-${each.key}"
+    Name = "${var.prefix.nacl}${var.pname}-${each.key}"
   }
 }
 
