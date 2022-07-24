@@ -85,6 +85,7 @@ locals {
       subnet_id = aws_subnet.subnet0["IB"].id
       vpc_security_group_ids = ["${aws_security_group.sg0["central"].id}"]
       associate_public_ip_address = false
+      user_data = "scripts/ldapserver_user_data.txt.template"
       private_ip = "172.22.1.20"
     }
 

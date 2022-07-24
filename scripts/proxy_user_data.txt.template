@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 
 apt update -y
-DEBIAN_FRONTEND=noninteractive apt install squid curl -y
+DEBIAN_FRONTEND=noninteractive apt install squid curl apache2-utils -y
 
 DC=$(cat /etc/squid/squid.conf)
 
@@ -32,5 +32,7 @@ EOF
 echo "ldapserver:\$apr1\$Do73bJ0v\$Amtfe0NJPBRUiebtptlOl." > /etc/squid/htpasswd
 
 curl https://raw.githubusercontent.com/Haunui/aws-terraform/master/haxa-assurance_auth --output /usr/lib/squid/haxa-assurance_auth
+
+chmod 755 /usr/lib/squid/haxa-assurance_auth
 
 systemctl restart squid

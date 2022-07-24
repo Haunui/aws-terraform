@@ -1,0 +1,29 @@
+#!/usr/bin/bash
+
+cat <<EOF > /etc/apt/apt.conf.d/10-proxy.conf
+Acquire::http::proxy "http://ldapserver:password@172.22.0.10:3128/";
+Acquire::https::proxy "http://ldapserver:password@172.22.0.10:3128/";
+Acquire::ftp::proxy "http://ldapserver:password@172.22.0.10:3128/";
+EOF
+
+while [ $(echo 'QUIT' | nc -w 1 172.22.0.10 3128 &>/dev/null; echo $?) -ne 0 ]; do
+  sleep 2
+done
+
+echo "slapd slapd/domain string haxa.assurance" | debconf-set-selections
+echo "slapd slapd/password1 string password" | debconf-set-selections
+echo "slapd slapd/password2 string password" | debconf-set-selections
+echo "slapd slapd/purge_database boolean true" | debconf-set-selections
+echo "slapd slapd/move_old_database boolean true" | debconf-set-selections
+echo "slapd slapd/dump_database boolean true" | debconf-set-selections
+echo "slapd slapd/dump_database_dest_dir string /var/backups/slapd-VERSION" | debconf-set-selections
+
+apt update -y
+DEBIAN_FRONTEND=noninteractive apt install -y slapd ldap-utils git
+
+systemctl restart slapd
+
+git clone https://github.com/Haunui/csv2ldap.git
+
+cd csv2ldap; bash csv2ldap.sh data.csv 172.22.1.20 "dc=haxa,dc=assurance"
+cd ..
